@@ -1,0 +1,13 @@
+# 비밀번호는 여기 넣지 않는다. Secret(todo-secret)은 다음 명령으로 .env에서 만든다.
+#   kubectl -n todo-3tier create secret generic todo-secret --from-env-file=.env
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: todo-config
+  namespace: todo-3tier
+data:
+  PGHOST: db
+  PGPORT: "5432"
+  PGUSER: todo
+  PGDATABASE: todo
+  PORT: "3000"
