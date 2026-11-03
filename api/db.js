@@ -13,4 +13,21 @@ export async function initDb() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `);
+
+  // 기존 할 일은 만든 날짜(한국 시간)로 채운다. 재시작해도 안전하게 다시 실행된다.
+  await pool.query('ALTER TABLE todos ADD COLUMN IF NOT EXISTS date DATE');
+  await pool.query(`
+    UPDATE todos SET date = (created_at AT TIME ZONE 'Asia/Seoul')::date
+    WHERE date IS NULL
+  `);
+  await pool.query('ALTER TABLE todos ALTER COLUMN date SET NOT NULL');
+
+  // 날짜별 시간대 일정과 메모. schedule은 {"09": "회의"} 형태다.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS days (
+      date     DATE PRIMARY KEY,
+      schedule JSONB NOT NULL DEFAULT '{}',
+      memo     TEXT NOT NULL DEFAULT ''
+    )
+  `);
 }
